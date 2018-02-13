@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import './App.css';
 import firebase from "firebase";
 import _ from 'lodash';
+import initFirebase from './Firebase.js';
 import Reboot from 'material-ui/Reboot';
 import Table, { TableBody, TableCell, TableFooter, TableHead, TablePagination, TableRow, TableSortLabel } from 'material-ui/Table';
 import Tooltip from 'material-ui/Tooltip';
 import Paper from 'material-ui/Paper';
-import initFirebase from './Firebase.js';
-import { Input, Button } from 'material-ui';
+import Icon from 'material-ui/Icon';
+import { Input, Button, Toolbar, IconButton } from 'material-ui';
 
 initFirebase();
 
@@ -21,12 +22,13 @@ class App extends Component {
 			showLogin: false,
 			userdata: [],
 			order: 'asc',
-			orderBy: 'last login',
+			orderBy: '',
 			selected: [],
 			page: 0,
 			rowsPerPage: 10,
 			username: '',
-			password: ''
+			password: '',
+			numSelected: 0
 		};
 	}
 
@@ -48,6 +50,27 @@ class App extends Component {
 			});
 		});
 	}
+
+	handleClick = (event, id) => {
+		const { selected } = this.state;
+		const selectedIndex = selected.indexOf(id);
+		let newSelected = [];
+	
+		if (selectedIndex === -1) {
+			newSelected = newSelected.concat(selected, id);
+		} else if (selectedIndex === 0) {
+			newSelected = newSelected.concat(selected.slice(1));
+		} else if (selectedIndex === selected.length - 1) {
+			newSelected = newSelected.concat(selected.slice(0, -1));
+		} else if (selectedIndex > 0) {
+			newSelected = newSelected.concat(
+				selected.slice(0, selectedIndex),
+				selected.slice(selectedIndex + 1),
+			);
+		}
+	
+		this.setState({ selected: newSelected, numSelected: newSelected.length });
+	};
 
 	handleRequestSort = (property) => {
 		const orderBy = property;
@@ -82,15 +105,17 @@ class App extends Component {
 		.catch(e => console.log(e));
 	}
 
+	isSelected = id => this.state.selected.indexOf(id) !== -1;
+
 	render() {
-		const { order, orderBy, selected, page, rowsPerPage, showLogin, userdata } = this.state;
+		const { order, orderBy, page, rowsPerPage, showLogin, userdata, numSelected } = this.state;
 		const emptyRows = rowsPerPage - Math.min(rowsPerPage, userdata.length - page * rowsPerPage);
 		return (
 			<div className="App">
 				<Reboot />
 				{showLogin
 				? (
-					<form onSubmit={this.handleLogin}>
+					<form onSubmit={this.handleLogin} style={{ marginBottom: '1em' }}>
 						<Input
 							label="username"
 							placeholder="username"
@@ -106,6 +131,8 @@ class App extends Component {
 							required
 						/>
 						<Button
+							color={'primary'}
+							variant={'raised'}
 							onClick={() => this.handleLogin()}
 						>
 							Login
@@ -115,6 +142,41 @@ class App extends Component {
 				: null
 				}
 				<Paper>
+					<Toolbar
+						className={numSelected > 0 ? 'highlighted' : null}
+					>
+						<div style={{ flex: '0 0 auto' }}>
+							{numSelected > 0 ? `${numSelected} selected` : 'Users'}
+						</div>
+						<div style={{ flex: '1 1 100%' }} />
+						<div>
+							{numSelected > 0 ? (
+							<div style={{ display: 'flex', flexDirection: 'row' }}>
+								<Tooltip title="Delete">
+									<IconButton aria-label="Delete">
+										<Icon color="action">delete</Icon>
+									</IconButton>
+								</Tooltip>
+								<Tooltip title="Edit">
+									<IconButton aria-label="Edit">
+										<Icon color="action">edit</Icon>
+									</IconButton>
+								</Tooltip>
+								<Tooltip title="Email">
+									<IconButton aria-label="Email">
+										<Icon color="action">email</Icon>
+									</IconButton>
+								</Tooltip>
+							</div>
+							) : (
+							<Tooltip title="Filter list">
+								<IconButton aria-label="Filter list">
+									<Icon>filter_list</Icon>
+								</IconButton>
+							</Tooltip>
+							)}
+						</div>
+					</Toolbar>
 					<Table>
 						<TableHead>
 							<TableRow>
@@ -143,9 +205,16 @@ class App extends Component {
 						</TableHead>
 						<TableBody>
 							{_.chain(userdata).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(({ isAnonymous, lastLogin, key }) => {
+								const isSelected = this.isSelected(key);
 								return (
 									<TableRow
 										key={key}
+										hover
+										onClick={event => this.handleClick(event, key)}
+										role="checkbox"
+										aria-checked={isSelected}
+										tabIndex={-1}
+										selected={isSelected}
 									>
 										<TableCell>
 											{isAnonymous ? isAnonymous.toString() : 'false'}
