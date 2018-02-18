@@ -3,7 +3,13 @@ import _ from 'lodash';
 import Table, { TableBody, TableCell, TableFooter, TableHead, TablePagination, TableRow, TableSortLabel } from 'material-ui/Table';
 import { Toolbar, IconButton, Tooltip, Paper, Icon } from 'material-ui';
 
-const columns = ['e-mail', 'provider', 'last login', 'created', 'uid'];
+const columns = [
+	{ key: 'email', label: 'e-mail' },
+	{ key: 'provider', label: 'provider' },
+	{ key: 'lastLogin', label: 'last login' },
+	{ key: 'created', label: 'created' },
+	{ key: 'key', label: 'uid' },
+];
 
 class Users extends Component {
 	constructor(props) {
@@ -116,19 +122,19 @@ class Users extends Component {
 							{columns.map(col =>
 								(
 									<TableCell
-										key={col}
-										sortDirection={orderBy === col ? order : false}
+										key={col.key}
+										sortDirection={orderBy === col.key ? order : false}
 									>
 										<Tooltip
 											title="Sortera"
 											enterDelay={500}
 										>
 											<TableSortLabel
-												active={orderBy === col}
+												active={orderBy === col.key}
 												direction={order}
-												onClick={() => this.handleRequestSort(col)}
+												onClick={() => this.handleRequestSort(col.key)}
 											>
-												{col}
+												{col.label}
 											</TableSortLabel>
 										</Tooltip>
 									</TableCell>
@@ -137,7 +143,7 @@ class Users extends Component {
 					</TableHead>
 					<TableBody>
 						{_.chain(userdata).slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-						.map(({ isAnonymous, lastLogin, key }) => {
+						.map(({ provider, lastLogin, key }) => {
 							const isSelected = this.isSelected(key);
 							return (
 								<TableRow
@@ -150,10 +156,10 @@ class Users extends Component {
 									selected={isSelected}
 								>
 									<TableCell>
-										{isAnonymous ? isAnonymous.toString() : 'false'}
+										{provider === 'Anonymous' ? '-' : 'e-mail'}
 									</TableCell>
 									<TableCell>
-										provider
+										{provider}
 									</TableCell>
 									<TableCell>
 										{lastLogin}

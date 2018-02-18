@@ -33,7 +33,7 @@ class App extends Component {
 			this.setState({
 				userdata: _.map(
 					snapshot.val(),
-					({ isAnonymous, lastLogin }, key) => ({ isAnonymous, lastLogin, key }),
+					({ isAnonymous, lastLogin }, key) => ({ provider: isAnonymous ? 'Anonymous' : 'Other', lastLogin, key }),
 				),
 			});
 		})
