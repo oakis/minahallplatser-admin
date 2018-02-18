@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import firebase from 'firebase';
 import _ from 'lodash';
 import Reboot from 'material-ui/Reboot';
+import { CircularProgress, Paper } from 'material-ui';
 import Login from './components/Login';
 import Users from './components/Users';
 import initFirebase from './Firebase';
@@ -15,12 +16,13 @@ class App extends Component {
 		this.state = {
 			showLogin: false,
 			userdata: [],
+			userdataLoading: true,
+			userdataError: false,
 		};
 	}
 
 	componentWillMount() {
 		firebase.auth().onAuthStateChanged((user) => {
-			console.log('auth state changed');
 			if (user) {
 				this.getUserData();
 			}
@@ -35,13 +37,17 @@ class App extends Component {
 					snapshot.val(),
 					({ isAnonymous, lastLogin }, key) => ({ provider: isAnonymous ? 'Anonymous' : 'Other', lastLogin, key }),
 				),
+				userdataLoading: false,
+				userdataError: false,
 			});
 		})
-		.catch(e => console.log(e));
+		.catch(e => this.setState({ userdataLoading: false, userdataError: e }));
 	}
 
 	render() {
-		const { showLogin, userdata } = this.state;
+		const {
+			showLogin, userdata, userdataError, userdataLoading,
+		} = this.state;
 		return (
 			<div className="App">
 				<Reboot />
@@ -49,9 +55,28 @@ class App extends Component {
 					? <Login />
 					: null
 				}
-				{userdata.length > 0
+				{userdataLoading === false && userdataError === false
 					? <Users userdata={userdata} />
-					: null
+					: (
+						<Paper
+							style={{
+								width: '100%', height: '417px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+							}}
+						>
+							<CircularProgress />
+						</Paper>
+					)
+				}
+				{userdataError !== false
+					? (
+						<Paper
+							style={{
+								width: '100%', height: '417px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+							}}
+						>
+							{userdataError}
+						</Paper>
+					) : null
 				}
 			</div>
 		);
