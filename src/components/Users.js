@@ -59,7 +59,6 @@ class Users extends Component {
 		}
 
 		const userdata = _.orderBy(this.state.userdata, orderBy, order);
-		console.log(userdata);
 
 		this.setState({ userdata, order, orderBy });
 	};
