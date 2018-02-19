@@ -79,7 +79,9 @@ class Users extends Component {
 		} = this.state;
 		const emptyRows = rowsPerPage - Math.min(rowsPerPage, userdata.length - (page * rowsPerPage));
 		return (
-			<Paper>
+			<Paper
+				style={{ marginBottom: '2.5em' }}
+			>
 				<Toolbar
 					className={numSelected > 0 ? 'highlighted' : null}
 				>
