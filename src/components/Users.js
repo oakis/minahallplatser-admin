@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import Table, { TableBody, TableCell, TableFooter, TableHead, TablePagination, TableRow, TableSortLabel } from 'material-ui/Table';
-import { Toolbar, IconButton, Tooltip, Paper, Icon } from 'material-ui';
+import { Toolbar, IconButton, Tooltip, Paper, Icon, Checkbox } from 'material-ui';
 
 const columns = [
-	{ key: 'email', label: 'e-mail' },
-	{ key: 'provider', label: 'provider' },
-	{ key: 'lastLogin', label: 'last login' },
-	{ key: 'created', label: 'created' },
-	{ key: 'key', label: 'uid' },
+	{ key: 'email', label: 'e-mail', icon: 'email' },
+	{ key: 'provider', label: 'provider', icon: 'language' },
+	{ key: 'lastLogin', label: 'last login', icon: 'access_time' },
+	{ key: 'created', label: 'created', icon: 'date_range' },
+	{ key: 'key', label: 'uid', icon: 'account_circle' },
 ];
 
 class Users extends Component {
@@ -22,14 +22,15 @@ class Users extends Component {
 			page: 0,
 			rowsPerPage: 5,
 			numSelected: 0,
+			editingUser: null,
 		};
 	}
 
 	componentWillReceiveProps(nextProps) {
-		this.setState({ userdata: nextProps.userdata }); // eslint-disable-line
+		this.setState({ userdata: nextProps.userdata });
 	}
 
-	handleClick = (event, id) => {
+	handleChange = (id) => {
 		const { selected } = this.state;
 		const selectedIndex = selected.indexOf(id);
 		let newSelected = [];
@@ -48,6 +49,10 @@ class Users extends Component {
 		}
 
 		this.setState({ selected: newSelected, numSelected: newSelected.length });
+	};
+
+	handleClick = (editingUser) => {
+		this.setState({ editingUser });
 	};
 
 	handleRequestSort = (property) => {
@@ -75,13 +80,11 @@ class Users extends Component {
 
 	render() {
 		const {
-			order, orderBy, page, rowsPerPage, userdata, numSelected,
+			order, orderBy, page, rowsPerPage, userdata, numSelected, editingUser,
 		} = this.state;
 		const emptyRows = rowsPerPage - Math.min(rowsPerPage, userdata.length - (page * rowsPerPage));
 		return (
-			<Paper
-				style={{ marginBottom: '2.5em' }}
-			>
+			<Paper>
 				<Toolbar
 					className={numSelected > 0 ? 'highlighted' : null}
 				>
@@ -120,9 +123,11 @@ class Users extends Component {
 				<Table>
 					<TableHead>
 						<TableRow>
+							<TableCell style={{ flex: 1 }} />
 							{columns.map(col =>
 								(
 									<TableCell
+										style={{ flex: 2 }}
 										key={col.key}
 										sortDirection={orderBy === col.key ? order : false}
 									>
@@ -146,16 +151,24 @@ class Users extends Component {
 						{_.chain(userdata).slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
 						.map(({ provider, lastLogin, key }) => {
 							const isSelected = this.isSelected(key);
+							const user = { provider, lastLogin, key };
 							return (
 								<TableRow
 									key={key}
 									hover
-									onClick={event => this.handleClick(event, key)}
+									onClick={() => this.handleClick(user)}
 									role="checkbox"
 									aria-checked={isSelected}
 									tabIndex={-1}
 									selected={isSelected}
 								>
+									<TableCell>
+										<Checkbox
+											checked={isSelected}
+											onChange={() => this.handleChange(key)}
+											color="primary"
+										/>
+									</TableCell>
 									<TableCell>
 										{provider === 'Anonymous' ? '-' : 'e-mail'}
 									</TableCell>

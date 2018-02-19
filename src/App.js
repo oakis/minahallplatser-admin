@@ -88,7 +88,7 @@ class App extends Component {
 					: (
 						<Paper
 							style={{
-								width: '100%', height: '417px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2.5em',
+								width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
 							}}
 						>
 							<CircularProgress />
@@ -99,7 +99,7 @@ class App extends Component {
 					? (
 						<Paper
 							style={{
-								width: '100%', height: '417px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2.5em',
+								width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
 							}}
 						>
 							{userdataError}
@@ -117,7 +117,7 @@ class App extends Component {
 					: (
 						<Paper
 							style={{
-								width: '100%', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+								width: '100%', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '2.5em',
 							}}
 						>
 							<CircularProgress />

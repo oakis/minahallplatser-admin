@@ -18,7 +18,7 @@ export default class Statistics extends PureComponent {
         return (
             <Paper
                 style={{
-                    width: '100%', height: '100px', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', marginBottom: '2.5em',
+                    width: '100%', height: '100px', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', marginTop: '2.5em',
                 }}
             >
                 <Stat value={numUsers} label="Users" />
