@@ -3,11 +3,26 @@ import firebase from 'firebase';
 import _ from 'lodash';
 import Reboot from 'material-ui/Reboot';
 import { CircularProgress, Paper } from 'material-ui';
+import green from 'material-ui/colors/green';
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import Login from './components/Login';
 import Users from './components/Users';
 import Statistics from './components/Statistics';
 import initFirebase, { functionsUrl } from './Firebase';
 import './App.css';
+
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+            main: '#779ECB',
+            contrastText: '#fff',
+        },
+        secondary: {
+            main: green[500],
+            contrastText: '#000',
+        },
+    },
+});
 
 initFirebase();
 
@@ -19,7 +34,6 @@ class App extends Component {
 			userdata: [],
 			userdataLoading: true,
 			userdataError: false,
-			statisticsLoading: true,
 			numUsers: 0,
 			numStops: 0,
 			numDepartures: 0,
@@ -31,6 +45,7 @@ class App extends Component {
 			if (user) {
 				this.getUserData();
 				this.getStatistics();
+				this.initFirebaseConnections();
 			}
 			this.setState({ showLogin: !user });
 		});
@@ -62,23 +77,17 @@ class App extends Component {
 				console.log('getNumUsers() error:', e);
 				return 'n/a';
 			});
-		const getNumStops = await fetch(`${functionsUrl}/getStopsCount`).then(data => (
-			data.json().then(stops => stops.stopsCount)
-		)).catch((e) => {
-			console.log('getNumstops() error:', e);
-			return 'n/a';
-		});
-		const getNumDepartures = await fetch(`${functionsUrl}/getDeparturesCount`).then(data => (
-			data.json().then(departures => departures.departuresCount)
-		)).catch((e) => {
-			console.log('getNumDepartures() error:', e);
-			return 'n/a';
-		});
 		this.setState({
 			numUsers: getNumUsers,
-			numStops: getNumStops,
-			numDepartures: getNumDepartures,
-			statisticsLoading: false,
+		});
+	}
+
+	initFirebaseConnections = () => {
+		firebase.database().ref('stats').on('value', (snapshot) => {
+			this.setState({
+				numStops: snapshot.val().stopsCount,
+				numDepartures: snapshot.val().departuresCount,
+			});
 		});
 	}
 
@@ -88,7 +97,6 @@ class App extends Component {
 			userdata,
 			userdataError,
 			userdataLoading,
-			statisticsLoading,
 			numUsers,
 			numStops,
 			numDepartures,
@@ -96,6 +104,7 @@ class App extends Component {
 		return (
 			<div className="App">
 				<Reboot />
+				<MuiThemeProvider theme={theme}>
 				{showLogin
 					? <Login />
 					: (
@@ -123,27 +132,15 @@ class App extends Component {
 									</Paper>
 								) : null
 							}
-							{statisticsLoading === false
-								? (
-									<Statistics
-										numUsers={numUsers}
-										numViewedStops={numStops}
-										numViewedDepartures={numDepartures}
-									/>
-								)
-								: (
-									<Paper
-										style={{
-											width: '100%', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '2.5em',
-										}}
-									>
-										<CircularProgress />
-									</Paper>
-								)
-							}
+							<Statistics
+								numUsers={numUsers}
+								numViewedStops={numStops}
+								numViewedDepartures={numDepartures}
+							/>
 						</div>
 					)
 				}
+				</MuiThemeProvider>
 			</div>
 		);
 	}
