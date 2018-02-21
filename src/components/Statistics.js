@@ -1,8 +1,11 @@
 import React, { PureComponent } from 'react';
-import { Paper, Toolbar, IconButton, Icon } from 'material-ui';
+import firebase from 'firebase';
+import { Paper, Toolbar, IconButton, Icon, Input } from 'material-ui';
 import { LinearProgress } from 'material-ui/Progress';
 
-const Stat = ({ value, label, goal }) => (
+const Stat = ({
+    value, label, goal, children,
+}) => (
     <div style={{ width: '25%' }}>
         <div
             style={{
@@ -10,7 +13,7 @@ const Stat = ({ value, label, goal }) => (
             }}
         >
             <p style={{ fontSize: '1em', margin: 0 }}>{label}</p>
-            <p style={{ fontSize: '2em', margin: 0, height: '37px' }}>{value === 0 ? '' : value}</p>
+            {children}
         </div>
         <LinearProgress color={goal === 100 ? 'secondary' : 'primary'} variant={value === 0 ? 'indeterminate' : 'determinate'} value={goal} />
     </div>
@@ -23,16 +26,61 @@ export default class Statistics extends PureComponent {
         super(props);
         this.state = {
             isEditing: false,
+            userGoals: this.props.userGoals,
+            stopsGoals: this.props.stopsGoals,
+            departuresGoals: this.props.departuresGoals,
         };
+    }
+
+    componentWillReceiveProps({ userGoals, stopsGoals, departuresGoals }) {
+        this.setState({
+            userGoals,
+            stopsGoals,
+            departuresGoals,
+        });
+    }
+
+    onChange = type => (event) => {
+        this.setState({ [type]: event.target.value === '' ? 0 : parseInt(event.target.value, 10) });
+    }
+
+    onSave = (type) => {
+        firebase.database().ref('stats').update({ [type]: this.state[type] })
+        .catch(e => console.log(e));
     }
 
     toggleEdit = () => {
         this.setState({ isEditing: !this.state.isEditing });
     }
 
+    renderInput(value, type) {
+        if (this.state.isEditing) {
+            return (
+                <Input
+                    value={this.state[type]}
+                    fullWidth
+                    style={{ height: '37px' }}
+                    onChange={this.onChange(type)}
+                    endAdornment={
+                        this.state[type] !== this.props[type] ?
+                        (
+                            <IconButton
+                                aria-label="Save"
+                                onClick={() => this.onSave(type)}
+                            >
+                                <Icon>save</Icon>
+                            </IconButton>
+                        ) : null
+                    }
+                />
+            );
+        }
+        return <p style={{ fontSize: '2em', margin: 0, height: '37px' }}>{value === 0 ? '' : value}</p>;
+    }
+
     render() {
         const {
-            numUsers, numViewedStops, numViewedDepartures, userGoal, stopGoal, departuresGoal,
+            numUsers, numViewedStops, numViewedDepartures, userGoals, stopsGoals, departuresGoals,
         } = this.props;
         return (
             <Paper
@@ -57,9 +105,15 @@ export default class Statistics extends PureComponent {
                         height: '100px', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center',
                     }}
                 >
-                    <Stat value={numUsers} label="Users" goal={getPercent(numUsers, userGoal)} />
-                    <Stat value={numViewedStops} label="Viewed stops" goal={getPercent(numViewedStops, stopGoal)} />
-                    <Stat value={numViewedDepartures} label="Viewed departures" goal={getPercent(numViewedDepartures, departuresGoal)} />
+                    <Stat value={numUsers} label="Users" goal={getPercent(numUsers, userGoals)}>
+                        {this.renderInput(numUsers, 'userGoals')}
+                    </Stat>
+                    <Stat value={numViewedStops} label="Viewed stops" goal={getPercent(numViewedStops, stopsGoals)}>
+                        {this.renderInput(numViewedStops, 'stopsGoals')}
+                    </Stat>
+                    <Stat value={numViewedDepartures} label="Viewed departures" goal={getPercent(numViewedDepartures, departuresGoals)}>
+                        {this.renderInput(numViewedDepartures, 'departuresGoals')}
+                    </Stat>
                 </div>
             </Paper>
         );

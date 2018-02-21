@@ -37,9 +37,9 @@ class App extends Component {
 			numUsers: 0,
 			numStops: 0,
 			numDepartures: 0,
-			userGoal: 0,
-			stopGoal: 0,
-			departuresGoal: 0,
+			userGoals: 0,
+			stopsGoals: 0,
+			departuresGoals: 0,
 		};
 	}
 
@@ -75,9 +75,9 @@ class App extends Component {
 				userGoals, stopsGoals, departuresGoals, stopsCount, departuresCount,
 			} = snapshot.val();
 			this.setState({
-				userGoal: userGoals,
-				stopGoal: stopsGoals,
-				departuresGoal: departuresGoals,
+				userGoals,
+				stopsGoals,
+				departuresGoals,
 				numStops: stopsCount,
 				numDepartures: departuresCount,
 			});
@@ -93,9 +93,9 @@ class App extends Component {
 			numUsers,
 			numStops,
 			numDepartures,
-			userGoal,
-			stopGoal,
-			departuresGoal,
+			userGoals,
+			stopsGoals,
+			departuresGoals,
 		} = this.state;
 		return (
 			<div className="App">
@@ -132,9 +132,9 @@ class App extends Component {
 								numUsers={numUsers}
 								numViewedStops={numStops}
 								numViewedDepartures={numDepartures}
-								userGoal={userGoal}
-								stopGoal={stopGoal}
-								departuresGoal={departuresGoal}
+								userGoals={userGoals}
+								stopsGoals={stopsGoals}
+								departuresGoals={departuresGoals}
 							/>
 						</div>
 					)
