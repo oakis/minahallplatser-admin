@@ -8,7 +8,7 @@ import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import Login from './components/Login';
 import Users from './components/Users';
 import Statistics from './components/Statistics';
-import initFirebase, { functionsUrl } from './Firebase';
+import initFirebase from './Firebase';
 import './App.css';
 
 const theme = createMuiTheme({
@@ -37,6 +37,9 @@ class App extends Component {
 			numUsers: 0,
 			numStops: 0,
 			numDepartures: 0,
+			userGoal: 0,
+			stopGoal: 0,
+			departuresGoal: 0,
 		};
 	}
 
@@ -44,7 +47,6 @@ class App extends Component {
 		firebase.auth().onAuthStateChanged((user) => {
 			if (user) {
 				this.getUserData();
-				this.getStatistics();
 				this.initFirebaseConnections();
 			}
 			this.setState({ showLogin: !user });
@@ -53,40 +55,31 @@ class App extends Component {
 
 	getUserData = () => {
 		firebase.database().ref('/users').once('value').then((snapshot) => {
+			const userdata = _.map(
+				snapshot.val(),
+				({ isAnonymous, lastLogin }, key) => ({ provider: isAnonymous ? 'Anonymous' : 'Other', lastLogin, key }),
+			);
 			this.setState({
-				userdata: _.map(
-					snapshot.val(),
-					({ isAnonymous, lastLogin }, key) => ({ provider: isAnonymous ? 'Anonymous' : 'Other', lastLogin, key }),
-				),
+				userdata,
 				userdataLoading: false,
 				userdataError: false,
+				numUsers: userdata.length,
 			});
 		})
 		.catch(e => this.setState({ userdataLoading: false, userdataError: e }));
 	}
 
-	getStatistics = async () => {
-		const getNumUsers = await fetch(`${functionsUrl}/getUsersCount`)
-			.then(data => (
-				data.json().then((users) => {
-					const { registered, anonymous, unknown } = users;
-					return registered + anonymous + unknown;
-				})
-			))
-			.catch((e) => {
-				console.log('getNumUsers() error:', e);
-				return 'n/a';
-			});
-		this.setState({
-			numUsers: getNumUsers,
-		});
-	}
-
 	initFirebaseConnections = () => {
 		firebase.database().ref('stats').on('value', (snapshot) => {
+			const {
+				userGoals, stopsGoals, departuresGoals, stopsCount, departuresCount,
+			} = snapshot.val();
 			this.setState({
-				numStops: snapshot.val().stopsCount,
-				numDepartures: snapshot.val().departuresCount,
+				userGoal: userGoals,
+				stopGoal: stopsGoals,
+				departuresGoal: departuresGoals,
+				numStops: stopsCount,
+				numDepartures: departuresCount,
 			});
 		});
 	}
@@ -100,6 +93,9 @@ class App extends Component {
 			numUsers,
 			numStops,
 			numDepartures,
+			userGoal,
+			stopGoal,
+			departuresGoal,
 		} = this.state;
 		return (
 			<div className="App">
@@ -136,6 +132,9 @@ class App extends Component {
 								numUsers={numUsers}
 								numViewedStops={numStops}
 								numViewedDepartures={numDepartures}
+								userGoal={userGoal}
+								stopGoal={stopGoal}
+								departuresGoal={departuresGoal}
 							/>
 						</div>
 					)
