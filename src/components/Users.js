@@ -149,9 +149,13 @@ class Users extends Component {
 					</TableHead>
 					<TableBody>
 						{_.chain(userdata).slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-						.map(({ provider, lastLogin, key }) => {
+						.map(({
+							lastLogin, created, email, provider, key,
+						}) => {
 							const isSelected = this.isSelected(key);
-							const user = { provider, lastLogin, key };
+							const user = {
+								lastLogin, created, email, provider, key,
+							};
 							return (
 								<TableRow
 									key={key}
@@ -170,16 +174,16 @@ class Users extends Component {
 										/>
 									</TableCell>
 									<TableCell>
-										{provider === 'Anonymous' ? '-' : 'e-mail'}
+										{email || '-'}
 									</TableCell>
 									<TableCell>
-										{provider}
+										{provider || '-'}
 									</TableCell>
 									<TableCell>
-										{lastLogin}
+										{lastLogin || '-'}
 									</TableCell>
 									<TableCell>
-										created
+										{created || '-'}
 									</TableCell>
 									<TableCell>
 										{key}

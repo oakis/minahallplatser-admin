@@ -57,7 +57,11 @@ class App extends Component {
 		firebase.database().ref('/users').once('value').then((snapshot) => {
 			const userdata = _.map(
 				snapshot.val(),
-				({ isAnonymous, lastLogin }, key) => ({ provider: isAnonymous ? 'Anonymous' : 'Other', lastLogin, key }),
+				({
+					lastLogin, created, email, provider,
+				}, key) => ({
+					lastLogin, created, email, provider, key,
+				}),
 			);
 			this.setState({
 				userdata,
