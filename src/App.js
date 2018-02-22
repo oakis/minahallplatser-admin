@@ -76,7 +76,7 @@ class App extends Component {
 				numUsers: userdata.length,
 			});
 		})
-		.catch(e => this.setState({ userdataLoading: false, userdataError: e }));
+		.catch(e => this.setState({ userdataLoading: false, userdataError: e.toString() }));
 	}
 
 	initFirebaseConnections = () => {
@@ -132,9 +132,11 @@ class App extends Component {
 							<div style={{ flex: 1 }}>
 								Mina Hållplatser Admin
 							</div>
-							<IconButton onClick={this.menuOpen}>
-								<Icon style={{ color: '#fff' }}>account_circle</Icon>
-							</IconButton>
+							{showLogin ? null :
+								<IconButton onClick={this.menuOpen}>
+									<Icon style={{ color: '#fff' }}>account_circle</Icon>
+								</IconButton>
+							}
 							<Menu
 								anchorEl={anchorEl}
 								open={anchorEl !== null}
@@ -151,7 +153,10 @@ class App extends Component {
 								<div>
 									{userdataLoading === false && userdataError === false
 										? <Users userdata={userdata} />
-										: (
+										: null
+									}
+									{userdataLoading === true
+										? (
 											<Paper
 												style={{
 													width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
@@ -159,28 +164,29 @@ class App extends Component {
 											>
 												<CircularProgress />
 											</Paper>
-										)
-									}
-									{userdataError !== false
-										? (
-											<Paper
-												style={{
-													width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
-												}}
-											>
-												{userdataError}
-											</Paper>
 										) : null
 									}
-									<Statistics
-										numUsers={numUsers}
-										numViewedStops={numStops}
-										numViewedDepartures={numDepartures}
-										userGoals={userGoals}
-										stopsGoals={stopsGoals}
-										departuresGoals={departuresGoals}
-									/>
-									<Feedback data={feedback} />
+									{userdataError === false ? (
+										<div>
+											<Statistics
+												numUsers={numUsers}
+												numViewedStops={numStops}
+												numViewedDepartures={numDepartures}
+												userGoals={userGoals}
+												stopsGoals={stopsGoals}
+												departuresGoals={departuresGoals}
+											/>
+											<Feedback data={feedback} />
+										</div>
+									) : (
+										<Paper
+											style={{
+												width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+											}}
+										>
+											{userdataError}
+										</Paper>
+									)}
 								</div>
 							)
 						}
