@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import firebase from 'firebase';
 import _ from 'lodash';
 import Reboot from 'material-ui/Reboot';
-import { CircularProgress, Paper } from 'material-ui';
+import { CircularProgress, Paper, AppBar, Toolbar, IconButton, Icon } from 'material-ui';
+import Menu, { MenuItem } from 'material-ui/Menu';
 import green from 'material-ui/colors/green';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import Login from './components/Login';
@@ -27,22 +28,25 @@ const theme = createMuiTheme({
 
 initFirebase();
 
+const initialState = {
+	showLogin: false,
+	userdata: [],
+	userdataLoading: true,
+	userdataError: false,
+	numUsers: 0,
+	numStops: 0,
+	numDepartures: 0,
+	userGoals: 0,
+	stopsGoals: 0,
+	departuresGoals: 0,
+	feedback: [],
+	anchorEl: null,
+};
+
 class App extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			showLogin: false,
-			userdata: [],
-			userdataLoading: true,
-			userdataError: false,
-			numUsers: 0,
-			numStops: 0,
-			numDepartures: 0,
-			userGoals: 0,
-			stopsGoals: 0,
-			departuresGoals: 0,
-			feedback: [],
-		};
+		this.state = initialState;
 	}
 
 	componentWillMount() {
@@ -92,6 +96,18 @@ class App extends Component {
 		});
 	}
 
+	logout = () => {
+		firebase.auth().signOut().then(() => this.setState(initialState));
+	}
+
+	menuClose = () => {
+		this.setState({ anchorEl: null });
+	}
+
+	menuOpen = (event) => {
+		this.setState({ anchorEl: event.currentTarget });
+	}
+
 	render() {
 		const {
 			showLogin,
@@ -105,50 +121,70 @@ class App extends Component {
 			stopsGoals,
 			departuresGoals,
 			feedback,
+			anchorEl,
 		} = this.state;
 		return (
 			<div className="App">
 				<Reboot />
 				<MuiThemeProvider theme={theme}>
-				{showLogin
-					? <Login />
-					: (
-						<div>
-							{userdataLoading === false && userdataError === false
-								? <Users userdata={userdata} />
-								: (
-									<Paper
-										style={{
-											width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
-										}}
-									>
-										<CircularProgress />
-									</Paper>
-								)
-							}
-							{userdataError !== false
-								? (
-									<Paper
-										style={{
-											width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
-										}}
-									>
-										{userdataError}
-									</Paper>
-								) : null
-							}
-							<Statistics
-								numUsers={numUsers}
-								numViewedStops={numStops}
-								numViewedDepartures={numDepartures}
-								userGoals={userGoals}
-								stopsGoals={stopsGoals}
-								departuresGoals={departuresGoals}
-							/>
-							<Feedback data={feedback} />
-						</div>
-					)
-				}
+					<AppBar position="sticky">
+						<Toolbar>
+							<div style={{ flex: 1 }}>
+								Mina Hållplatser Admin
+							</div>
+							<IconButton onClick={this.menuOpen}>
+								<Icon style={{ color: '#fff' }}>account_circle</Icon>
+							</IconButton>
+							<Menu
+								anchorEl={anchorEl}
+								open={anchorEl !== null}
+								onClose={this.menuClose}
+							>
+								<MenuItem onClick={this.logout}>Logout</MenuItem>
+							</Menu>
+						</Toolbar>
+					</AppBar>
+					<div style={{ padding: '2.5em 5em' }}>
+						{showLogin
+							? <Login />
+							: (
+								<div>
+									{userdataLoading === false && userdataError === false
+										? <Users userdata={userdata} />
+										: (
+											<Paper
+												style={{
+													width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+												}}
+											>
+												<CircularProgress />
+											</Paper>
+										)
+									}
+									{userdataError !== false
+										? (
+											<Paper
+												style={{
+													width: '100%', height: '462px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+												}}
+											>
+												{userdataError}
+											</Paper>
+										) : null
+									}
+									<Statistics
+										numUsers={numUsers}
+										numViewedStops={numStops}
+										numViewedDepartures={numDepartures}
+										userGoals={userGoals}
+										stopsGoals={stopsGoals}
+										departuresGoals={departuresGoals}
+									/>
+									<Feedback data={feedback} />
+								</div>
+							)
+						}
+					</div>
 				</MuiThemeProvider>
 			</div>
 		);
