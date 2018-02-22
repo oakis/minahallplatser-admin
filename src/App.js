@@ -8,6 +8,7 @@ import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import Login from './components/Login';
 import Users from './components/Users';
 import Statistics from './components/Statistics';
+import Feedback from './components/Feedback';
 import initFirebase from './Firebase';
 import './App.css';
 
@@ -40,6 +41,7 @@ class App extends Component {
 			userGoals: 0,
 			stopsGoals: 0,
 			departuresGoals: 0,
+			feedback: [],
 		};
 	}
 
@@ -74,16 +76,18 @@ class App extends Component {
 	}
 
 	initFirebaseConnections = () => {
-		firebase.database().ref('stats').on('value', (snapshot) => {
+		firebase.database().ref().on('value', (snapshot) => {
+			const { stats, feedback } = snapshot.val();
 			const {
 				userGoals, stopsGoals, departuresGoals, stopsCount, departuresCount,
-			} = snapshot.val();
+			} = stats;
 			this.setState({
 				userGoals,
 				stopsGoals,
 				departuresGoals,
 				numStops: stopsCount,
 				numDepartures: departuresCount,
+				feedback: _.map(feedback, (item, key) => ({ item, key })),
 			});
 		});
 	}
@@ -100,6 +104,7 @@ class App extends Component {
 			userGoals,
 			stopsGoals,
 			departuresGoals,
+			feedback,
 		} = this.state;
 		return (
 			<div className="App">
@@ -140,6 +145,7 @@ class App extends Component {
 								stopsGoals={stopsGoals}
 								departuresGoals={departuresGoals}
 							/>
+							<Feedback data={feedback} />
 						</div>
 					)
 				}
