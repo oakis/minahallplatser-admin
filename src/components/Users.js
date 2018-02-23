@@ -135,96 +135,102 @@ class Users extends Component {
 						)}
 					</div>
 				</Toolbar>
-				<Table>
-					<TableHead>
-						<TableRow>
-							<TableCell style={{ flex: 1 }} />
-							{columns.map(col =>
-								(
-									<TableCell
-										style={{ flex: 2 }}
-										key={col.key}
-										sortDirection={orderBy === col.key ? order : false}
-									>
-										<Tooltip
-											title="Sortera"
-											enterDelay={500}
+				<div style={{ overflowX: 'auto' }}>
+					<Table style={{ overflow: 'hidden' }}>
+						<TableHead>
+							<TableRow>
+								<TableCell padding="checkbox" />
+								{columns.map(col =>
+									(
+										<TableCell
+											key={col.key}
+											sortDirection={orderBy === col.key ? order : false}
 										>
-											<TableSortLabel
-												active={orderBy === col.key}
-												direction={order}
-												onClick={() => this.handleRequestSort(col.key)}
+											<Tooltip
+												title="Sortera"
+												enterDelay={500}
 											>
-												{col.label}
-											</TableSortLabel>
-										</Tooltip>
-									</TableCell>
-								))}
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{_.chain(userdata).slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-						.map(({
-							lastLogin, created, email, provider, key,
-						}) => {
-							const isSelected = this.isSelected(key);
-							const user = {
-								lastLogin, created, email, provider, key,
-							};
-							return (
-								<TableRow
-									key={key}
-									hover
-									onClick={() => this.handleClick(user)}
-									role="checkbox"
-									aria-checked={isSelected}
-									tabIndex={-1}
-									selected={isSelected}
-								>
-									<TableCell>
-										<Checkbox
-											checked={isSelected}
-											onChange={() => this.handleChange(key)}
-											color="primary"
-										/>
-									</TableCell>
-									<TableCell>
-										{email || '-'}
-									</TableCell>
-									<TableCell>
-										{this.getProviderIcon(provider)}
-									</TableCell>
-									<TableCell>
-										{lastLogin || '-'}
-									</TableCell>
-									<TableCell>
-										{created || '-'}
-									</TableCell>
-									<TableCell>
-										{key}
-									</TableCell>
-								</TableRow>
-							);
-						}).value()}
-						{emptyRows > 0 && (
-							<TableRow style={{ height: 48 * emptyRows }}>
-								<TableCell colSpan={6} />
+												<TableSortLabel
+													active={orderBy === col.key}
+													direction={order}
+													onClick={() => this.handleRequestSort(col.key)}
+													style={{ whiteSpace: 'nowrap' }}
+												>
+													{col.label}
+												</TableSortLabel>
+											</Tooltip>
+										</TableCell>
+									))}
 							</TableRow>
-						)}
-					</TableBody>
-					<TableFooter>
-					<TableRow>
-						<TablePagination
-							colSpan={6}
-							count={userdata.length}
-							rowsPerPage={rowsPerPage}
-							page={page}
-							onChangePage={this.handleChangePage}
-							onChangeRowsPerPage={this.handleChangeRowsPerPage}
-						/>
-					</TableRow>
-					</TableFooter>
-				</Table>
+						</TableHead>
+						<TableBody>
+							{_.chain(userdata).slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+							.map(({
+								lastLogin, created, email, provider, key,
+							}) => {
+								const isSelected = this.isSelected(key);
+								const user = {
+									lastLogin, created, email, provider, key,
+								};
+								return (
+									<TableRow
+										key={key}
+										hover
+										onClick={() => this.handleClick(user)}
+										role="checkbox"
+										aria-checked={isSelected}
+										tabIndex={-1}
+										selected={isSelected}
+									>
+										<TableCell padding="checkbox">
+											<Checkbox
+												checked={isSelected}
+												onChange={() => this.handleChange(key)}
+												color="primary"
+											/>
+										</TableCell>
+										<TableCell>
+											{email || '-'}
+										</TableCell>
+										<TableCell>
+											{this.getProviderIcon(provider)}
+										</TableCell>
+										<TableCell>
+											{lastLogin || '-'}
+										</TableCell>
+										<TableCell>
+											{created || '-'}
+										</TableCell>
+										<TableCell>
+											{key}
+										</TableCell>
+									</TableRow>
+								);
+							}).value()}
+							{emptyRows > 0 && (
+								<TableRow style={{ height: 48 * emptyRows }}>
+									<TableCell colSpan={6} />
+								</TableRow>
+							)}
+						</TableBody>
+					</Table>
+				</div>
+				<Toolbar>
+					<Table style={{ justifyContent: 'flex-end', width: '100%', display: 'flex' }}>
+						<TableFooter>
+							<TableRow>
+								<TablePagination
+									colSpan={6}
+									count={userdata.length}
+									rowsPerPage={rowsPerPage}
+									page={page}
+									onChangePage={this.handleChangePage}
+									onChangeRowsPerPage={this.handleChangeRowsPerPage}
+								/>
+							</TableRow>
+						</TableFooter>
+					</Table>
+				</Toolbar>
 			</Paper>
 		);
 	}
