@@ -13,5 +13,9 @@
     },
     "globals": {
         "fetch": true
+    },
+    "plugins": ["jest"],
+    "env": {
+        "jest/globals": true
     }
 }
