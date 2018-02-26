@@ -19,7 +19,7 @@ class Login extends Component {
         firebase.auth().signInWithEmailAndPassword(username, password)
         .then(() => console.log('Logged in.'))
 		.catch((e) => {
-            alert(e);
+            console.log(e);
             this.setState({
                 userreq: username.length === 0,
                 passreq: password.length === 0,
