@@ -5,6 +5,7 @@ import ExpansionPanel, {
     ExpansionPanelDetails,
     ExpansionPanelActions,
 } from 'material-ui/ExpansionPanel';
+import firebase from 'firebase';
 
 const FeedbackItem = ({ children, label }) => (
     <div style={{ marginRight: '10px', whiteSpace: label === 'Message' ? 'wrap' : 'nowrap' }}>
@@ -22,9 +23,13 @@ export default class Feedback extends PureComponent {
     }
 
     componentWillReceiveProps({ data }) {
-        const feedback = data.map(item => (
-            { ...item, item: { ...item.item, reply: '' } }
-        ));
+        const feedback = data.map((item) => {
+            const hasReplied = item.item && item.item.reply && item.item.reply.length !== 0;
+            if (hasReplied) {
+                return { ...item, item: { ...item.item, hasReplied } };
+            }
+            return { ...item, item: { ...item.item, reply: '' } };
+        });
         this.setState({
             feedback,
         });
@@ -38,7 +43,9 @@ export default class Feedback extends PureComponent {
 
     reply = (e, index) => {
         e.preventDefault();
-        console.log(this.state.feedback[index].item.reply);
+        firebase.database()
+            .ref(`feedback/${this.state.feedback[index].key}`)
+            .update({ reply: this.state.feedback[index].item.reply });
     }
 
     render() {
@@ -57,7 +64,7 @@ export default class Feedback extends PureComponent {
                     const {
                         appVersion, device, email, message, name, os,
                     } = item;
-                    const { reply } = this.state.feedback[index].item;
+                    const { reply, hasReplied } = this.state.feedback[index].item;
                     return (
                         <ExpansionPanel key={key}>
                             <ExpansionPanelSummary
@@ -90,19 +97,20 @@ export default class Feedback extends PureComponent {
                             </ExpansionPanelDetails>
                             <Divider />
                             <ExpansionPanelActions>
-                                <form onSubmit={e => this.reply(e, index)}>
-                                    <TextField
-                                        onChange={this.setReply(index)}
-                                        value={reply}
-                                        fullWidth
-                                    />
-                                    <Button
-                                        size="small"
-                                        type="submit"
-                                    >
-                                        <Icon>email</Icon> Reply
-                                    </Button>
-                                </form>
+                                <TextField
+                                    disabled={hasReplied}
+                                    onChange={this.setReply(index)}
+                                    value={reply}
+                                    fullWidth
+                                    multiline
+                                />
+                                <Button
+                                    disabled={hasReplied}
+                                    size="small"
+                                    onClick={e => this.reply(e, index)}
+                                >
+                                    <Icon>email</Icon> Reply
+                                </Button>
                             </ExpansionPanelActions>
                         </ExpansionPanel>
                     );
