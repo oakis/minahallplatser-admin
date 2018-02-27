@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
+import moment from 'moment';
 import Table, { TableBody, TableCell, TableFooter, TableHead, TablePagination, TableRow, TableSortLabel } from 'material-ui/Table';
 import { Toolbar, IconButton, Tooltip, Paper, Icon, Checkbox } from 'material-ui';
 
@@ -90,6 +91,8 @@ class Users extends Component {
 	handleChangePage = (event, page) => {
 		this.setState({ page });
 	};
+
+	humanReadableDate = date => (date ? moment(date).format('MMM Do YYYY, HH:mm:ss ZZ') : '-');
 
 	isSelected = id => this.state.selected.indexOf(id) !== -1;
 
@@ -196,10 +199,10 @@ class Users extends Component {
 											{this.getProviderIcon(provider)}
 										</TableCell>
 										<TableCell>
-											{lastLogin || '-'}
+											{this.humanReadableDate(lastLogin)}
 										</TableCell>
 										<TableCell>
-											{created || '-'}
+											{this.humanReadableDate(created)}
 										</TableCell>
 										<TableCell>
 											{key}
